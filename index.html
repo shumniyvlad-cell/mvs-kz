@@ -37,6 +37,8 @@
 <body>
 
 <a class="skip" href="#controls">Перейти к содержанию</a>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
 
 <header class="nav intro" id="nav">
   <div class="nav__inner">
@@ -81,61 +83,102 @@
 
 <main id="main">
 
-<!-- 01 · Порог: дверь-кадр -->
+<!-- 01 · Порог: слова как дверь -->
 <section class="hero" id="top" data-theme="light">
   <div class="hero__stage">
+
+    <!-- Десктоп: кадр виден сквозь буквы вопроса, при скролле уходим сквозь буквы в кадр -->
+    <svg class="mask intro" aria-hidden="true" focusable="false">
+      <defs>
+        <mask id="tm" maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
+          <rect class="mask__bg" width="100%" height="100%" fill="#000"/>
+          <g class="mask__g">
+            <text class="mask__t" data-line="Твоя жизнь —" fill="#fff"></text>
+            <text class="mask__t" data-line="это точно" fill="#fff"></text>
+            <text class="mask__t" data-line="твой выбор" fill="#fff"></text>
+          </g>
+          <rect class="mask__open" width="100%" height="100%" fill="#fff" opacity="0"/>
+        </mask>
+      </defs>
+      <image class="mask__img" href="assets/img/hero-door.webp" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" mask="url(#tm)"/>
+      <rect class="mask__shade" x="0" y="0" width="100%" height="100%" fill="#17171A" opacity=".6" mask="url(#tm)"/>
+      <g class="mask__qg"><text class="mask__q" fill="#D96E2B">?</text></g>
+    </svg>
+    <div class="hero__veil" aria-hidden="true"></div>
+
+    <!-- Мобильный: дверь-кадр -->
     <div class="scene intro" aria-hidden="true">
       <img class="scene__img" src="assets/img/hero-door.webp" srcset="assets/img/hero-door-1280.webp 1280w, assets/img/hero-door.webp 1920w" sizes="100vw" width="1920" height="1086" alt="" fetchpriority="high" decoding="async">
       <div class="scene__veil"></div>
       <span class="tag scene__tag">визуализация</span>
     </div>
+
+
+    <div class="hero__top">
+      <p class="chapter hero__kicker intro"><i></i>Мировоззренческий семинар Леонида Тальписа</p>
+      <span class="tag hero__tag intro">визуализация</span>
+    </div>
     <div class="wrap hero__content">
-      <p class="chapter intro"><i></i>Мировоззренческий семинар Леонида Тальписа</p>
       <h1 class="h1 hero__title">
         <span class="line"><span class="intro">Твоя жизнь —</span></span>
         <span class="line"><span class="intro">это точно</span></span>
         <span class="line"><span class="intro">твой выбор<span class="q">?</span></span></span>
       </h1>
-      <p class="lead intro">Два дня, чтобы увидеть, что на самом деле управляет вашей жизнью</p>
-      <p class="meta intro"><span>26–27 сентября 2026</span><span>Алматы + онлайн</span><span data-countdown>через 15 дней</span></p>
-      <div class="actions intro">
-        <a class="btn btn--primary" href="#buy">Выбрать формат участия</a>
-        <a class="btn btn--ghost" href="#program">Программа двух дней</a>
+      <div class="hero__bottom">
+        <div class="hero__text">
+          <p class="lead intro">Два дня, чтобы увидеть, что на самом деле управляет вашей жизнью</p>
+          <p class="meta intro"><span>26–27 сентября 2026</span><span>Алматы + онлайн</span><span data-countdown>через 15 дней</span></p>
+        </div>
+        <div class="actions intro">
+          <a class="btn btn--primary" href="#buy" data-magnet>Выбрать формат участия</a>
+          <a class="btn btn--ghost" href="#program">Программа двух дней</a>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 02 · Что управляет нашей жизнью -->
-<section class="sec sec--entry" id="controls" data-theme="light">
-  <div class="wrap">
-    <p class="lead bridge reveal">Это не ещё один разговор о том, «как правильно жить», а возможность увидеть из чего на самом деле складывается ваша текущая реальность</p>
-    <div class="grid">
-      <div class="col-left">
-        <p class="chapter reveal"><i></i>Что управляет нашей жизнью</p>
-        <h2 class="h2 reveal">Мы думаем, что решения принимаем осознанно</h2>
-        <figure class="media media--tall reveal hang">
-          <img src="assets/img/desk.webp" srcset="assets/img/desk-640.webp 640w, assets/img/desk.webp 991w" sizes="(max-width: 899px) 100vw, 45vw" width="991" height="1321" alt="Человек сидит спиной к нам за столом у окна" loading="lazy" decoding="async">
-          <span class="tag">визуализация</span>
-        </figure>
-      </div>
-      <div class="col-right copy reveal">
-        <p class="lead">Но часто за нашими выборами стоят вещи, которых мы даже не замечаем:</p>
-        <p class="recog unseen"><span>убеждения,</span> <span>ценности,</span> <span>семейные</span> <span>программы,</span> <span>представления</span> <span>о любви,</span> <span>деньгах,</span> <span>близости,</span> <span>успехе,</span> <span>себе</span> <span>и других</span> <span>людях.</span></p>
-        <p>Именно через них мы фильтруем наши состояния, мысли и действия.</p>
-        <p>И если что-то в ней нас не устраивает, важно сначала увидеть: из чего именно она сложена.</p>
-        <p class="mark">Мы сами создаём ту жизнь, которую живём.</p>
-      </div>
+<!-- 02 · Что управляет нашей жизнью: поле невидимых причин -->
+<section class="sec sec--entry field" id="controls" data-theme="light">
+  <div class="field__pin">
+    <div class="wrap">
+      <p class="lead bridge reveal">Это не ещё один разговор о том, «как правильно жить», а возможность увидеть из чего на самом деле складывается ваша текущая реальность</p>
+      <p class="chapter reveal"><i></i>Что управляет нашей жизнью</p>
+      <h2 class="h2 split">Мы думаем, что решения принимаем осознанно</h2>
+      <p class="lead reveal field__lead">Но часто за нашими выборами стоят вещи, которых мы даже не замечаем:</p>
+    </div>
+    <div class="field__words" aria-hidden="true">
+      <span style="--x:6%;--y:8%;--s:1.9">убеждения,</span>
+      <span style="--x:44%;--y:2%;--s:1.35">ценности,</span>
+      <span style="--x:54%;--y:22%;--s:2.2">семейные программы,</span>
+      <span style="--x:10%;--y:42%;--s:1.5">представления о любви,</span>
+      <span style="--x:52%;--y:50%;--s:2.6">деньгах,</span>
+      <span style="--x:78%;--y:62%;--s:1.3">близости,</span>
+      <span style="--x:18%;--y:72%;--s:2.1">успехе,</span>
+      <span style="--x:48%;--y:82%;--s:1.4">себе</span>
+      <span style="--x:62%;--y:92%;--s:1.8">и других людях.</span>
+    </div>
+    <p class="sr-only">убеждения, ценности, семейные программы, представления о любви, деньгах, близости, успехе, себе и других людях.</p>
+  </div>
+  <div class="wrap grid field__after">
+    <figure class="media media--tall col-left reveal" data-cursor="смотреть">
+      <img src="assets/img/desk.webp" srcset="assets/img/desk-640.webp 640w, assets/img/desk.webp 991w" sizes="(max-width: 899px) 100vw, 45vw" width="991" height="1321" alt="Человек сидит спиной к нам за столом у окна" loading="lazy" decoding="async">
+      <span class="tag">визуализация</span>
+    </figure>
+    <div class="col-right copy reveal">
+      <p class="lead">Именно через них мы фильтруем наши состояния, мысли и действия.</p>
+      <p>И если что-то в ней нас не устраивает, важно сначала увидеть: из чего именно она сложена.</p>
+      <p class="mark split">Мы сами создаём ту жизнь, которую живём.</p>
     </div>
   </div>
 </section>
 
 <!-- 03 · Зачем приходить -->
-<section class="sec sec--lime" id="mvs" data-theme="light">
+<section class="sec sec--lime sec--round" id="mvs" data-theme="light">
   <div class="wrap grid">
     <div class="col-left">
       <p class="chapter reveal"><i></i>Зачем приходить</p>
-      <h2 class="h2 reveal">Мировоззренческий семинар — возможность докрутить свою жизнь</h2>
+      <h2 class="h2 split">Мировоззренческий семинар — возможность докрутить свою жизнь</h2>
     </div>
     <div class="col-right copy reveal">
       <p class="lead">Не пытаться менять внешние обстоятельства. А увидеть те внутренние механизмы, которые снова и снова приводят нас в одни и те же точки.</p>
@@ -150,7 +193,7 @@
       <li>К себе.</li>
       <li>Свою реализацию.</li>
     </ul>
-    <figure class="media media--portrait col-right reveal">
+    <figure class="media media--portrait col-right reveal" data-cursor="смотреть">
       <img src="assets/img/mirror.webp" srcset="assets/img/mirror-640.webp 640w, assets/img/mirror.webp 928w" sizes="(max-width: 899px) 100vw, 40vw" width="928" height="1152" alt="Человек стоит перед матовым стеклом и видит своё размытое отражение" loading="lazy" decoding="async">
       <span class="tag">визуализация</span>
     </figure>
@@ -161,31 +204,31 @@
 <section class="sec" id="seminar" data-theme="light">
   <div class="wrap">
     <p class="chapter reveal"><i></i>Как проходит семинар</p>
-    <h2 class="h2 h2--xl reveal">Это не лекция</h2>
+    <h2 class="h2 h2--xl split">Это не лекция</h2>
   </div>
   <div class="wrap grid">
     <div class="col-left copy reveal">
       <p>Только небольшая часть — это знакомство со структурой ВсеЛенского взгляда на мир, необходимой нам для дальнейшей работы и понимания происходящего на сцене.</p>
       <p class="lead">Основная часть семинара — работа с людьми из зала. Мы будем брать реальные вопросы участников:</p>
-      <p class="topics"><span>Отношения.</span> <span>Деньги.</span> <span>Работа.</span> <span>Дети.</span> <span>Родители.</span> <span>Выбор.</span> <span>Страх.</span></p>
+      <p class="topics split">Отношения. Деньги. Работа. Дети. Родители. Выбор. Страх.</p>
       <p>И прямо на месте смотреть: что на самом деле происходит, что за этим стоит и что можно изменить. Повторяющиеся ситуации.</p>
     </div>
-    <figure class="media media--tall col-right reveal">
+    <figure class="media media--tall col-right reveal" data-cursor="смотреть">
       <img src="assets/img/demo.webp" srcset="assets/img/demo-640.webp 640w, assets/img/demo.webp 1100w" sizes="(max-width: 899px) 100vw, 40vw" width="1100" height="1650" alt="Леонид Тальпис разбирает вопрос участницы на сцене" loading="lazy" decoding="async">
     </figure>
-    <figure class="media media--wide col-12 reveal">
-      <img src="assets/img/stage.webp" srcset="assets/img/stage-640.webp 640w, assets/img/stage.webp 1600w" sizes="100vw" width="1600" height="1067" alt="Леонид Тальпис на сцене перед полным залом" loading="lazy" decoding="async">
-      <figcaption>Прошлый МВС: работа с залом</figcaption>
-    </figure>
   </div>
+  <figure class="bleed reveal" data-cursor="смотреть">
+    <img src="assets/img/stage.webp" srcset="assets/img/stage-640.webp 640w, assets/img/stage.webp 1600w" sizes="100vw" width="1600" height="1067" alt="Леонид Тальпис на сцене перед полным залом" loading="lazy" decoding="async">
+    <figcaption class="bleed__cap">Прошлый МВС: работа с залом</figcaption>
+  </figure>
 </section>
 
 <!-- 05 · Почему мы живём именно так -->
-<section class="sec sec--lime" id="exactly-so" data-theme="light">
+<section class="sec sec--lime sec--round" id="exactly-so" data-theme="light">
   <div class="wrap grid">
     <div class="col-left sticky">
       <p class="chapter reveal"><i></i>Почему мы живём именно так</p>
-      <h2 class="h2 reveal">Нас учили читать, считать, получать образование, работать</h2>
+      <h2 class="h2 split">Нас учили читать, считать, получать образование, работать</h2>
       <p class="lead reveal" style="margin-top:26px">Но почти никто не учил нас:</p>
     </div>
     <ul class="stack stack--big col-right" aria-label="Чему нас не учили">
@@ -198,7 +241,7 @@
     </ul>
   </div>
   <div class="wrap grid">
-    <figure class="media media--portrait col-left reveal">
+    <figure class="media media--portrait col-left reveal" data-cursor="смотреть">
       <img src="assets/img/window.webp" srcset="assets/img/window-640.webp 640w, assets/img/window.webp 880w" sizes="(max-width: 899px) 100vw, 50vw" width="880" height="1173" alt="Человек в пальто стоит у светлого окна, спиной к нам" loading="lazy" decoding="async">
       <span class="tag">визуализация</span>
     </figure>
@@ -211,56 +254,56 @@
         <span class="echo__ghost" aria-hidden="true">«У меня всё будет иначе».</span>
       </p>
       <p>А потом обнаруживать себя в очень знакомых отношениях, конфликтах и сценариях.</p>
-      <p class="mark">На семинаре можно увидеть: что из этого действительно ваше, а что вы просто давно несёте с собой</p>
+      <p class="mark split">На семинаре можно увидеть: что из этого действительно ваше, а что вы просто давно несёте с собой</p>
     </div>
   </div>
 </section>
 
-<!-- 06 · С чем будем работать -->
+<!-- 06 · С чем будем работать: коридор из семи тем -->
 <section class="sec work" id="work" data-theme="light">
   <div class="work__stage">
     <div class="wrap work__head">
       <div>
         <p class="chapter reveal"><i></i>Семь тем двух дней</p>
-        <h2 class="h2 reveal">С чем будем работать</h2>
+        <h2 class="h2 split">С чем будем работать</h2>
       </div>
       <div class="work__progress" aria-hidden="true"><i></i></div>
     </div>
     <div class="work__track">
-      <figure class="door door--image">
-        <img src="assets/img/light-wall.webp" srcset="assets/img/light-wall-640.webp 640w, assets/img/light-wall.webp 1400w" sizes="(max-width: 899px) 100vw, 34vw" width="1400" height="930" alt="Дневной свет из окна ложится на светлую стену" loading="lazy" decoding="async">
-        <span class="tag">визуализация</span>
-      </figure>
-      <article class="door"><h3 class="h3">Отношения</h3><p>Почему мы выбираем именно этих людей. Почему хотим близости и одновременно защищаемся от неё.</p></article>
-      <article class="door"><h3 class="h3">Родители, семья, род</h3><p>Какие модели мы продолжаем повторять, даже когда уверены, что давно от них ушли.</p></article>
-      <article class="door"><h3 class="h3">Дети</h3><p>Где заканчивается любовь и начинается контроль.</p></article>
-      <article class="door"><h3 class="h3">Отношения с собой</h3><p>Почему мы не всегда разрешаем себе ту жизнь, которую на самом деле хотим.</p></article>
-      <article class="door"><h3 class="h3">Отношения с Создателем</h3><p>О доверии, согласии с жизнью и попытке перестать контролировать всё происходящее.</p></article>
-      <article class="door"><h3 class="h3">Деньги и реализация</h3><p>Что определяет наш финансовый потолок. Почему мы можем хотеть большего и одновременно удерживать себя там, где находимся.</p></article>
-      <article class="door"><h3 class="h3">Отношения с бизнесом</h3><p>Как мы проходим мимо собственного успеха. Какие состояния мы выбираем и как они определяют нашу жизнь — например, изобилие или дефицит.</p></article>
+      <article class="door" data-cursor="тема"><div class="door__img"><img src="assets/img/topic-1.webp" width="1000" height="750" alt="" loading="lazy" decoding="async"><span class="tag">визуализация</span></div><h3 class="h3">Отношения</h3><p>Почему мы выбираем именно этих людей. Почему хотим близости и одновременно защищаемся от неё.</p></article>
+      <article class="door" data-cursor="тема"><div class="door__img"><img src="assets/img/topic-2.webp" width="1000" height="750" alt="" loading="lazy" decoding="async"><span class="tag">визуализация</span></div><h3 class="h3">Родители, семья, род</h3><p>Какие модели мы продолжаем повторять, даже когда уверены, что давно от них ушли.</p></article>
+      <article class="door" data-cursor="тема"><div class="door__img"><img src="assets/img/topic-3.webp" width="1000" height="750" alt="" loading="lazy" decoding="async"><span class="tag">визуализация</span></div><h3 class="h3">Дети</h3><p>Где заканчивается любовь и начинается контроль.</p></article>
+      <article class="door" data-cursor="тема"><div class="door__img"><img src="assets/img/topic-4.webp" width="1000" height="750" alt="" loading="lazy" decoding="async"><span class="tag">визуализация</span></div><h3 class="h3">Отношения с собой</h3><p>Почему мы не всегда разрешаем себе ту жизнь, которую на самом деле хотим.</p></article>
+      <article class="door" data-cursor="тема"><div class="door__img"><img src="assets/img/topic-5.webp" width="1000" height="750" alt="" loading="lazy" decoding="async"><span class="tag">визуализация</span></div><h3 class="h3">Отношения с Создателем</h3><p>О доверии, согласии с жизнью и попытке перестать контролировать всё происходящее.</p></article>
+      <article class="door" data-cursor="тема"><div class="door__img"><img src="assets/img/topic-6.webp" width="1000" height="750" alt="" loading="lazy" decoding="async"><span class="tag">визуализация</span></div><h3 class="h3">Деньги и реализация</h3><p>Что определяет наш финансовый потолок. Почему мы можем хотеть большего и одновременно удерживать себя там, где находимся.</p></article>
+      <article class="door" data-cursor="тема"><div class="door__img"><img src="assets/img/topic-7.webp" width="1000" height="750" alt="" loading="lazy" decoding="async"><span class="tag">визуализация</span></div><h3 class="h3">Отношения с бизнесом</h3><p>Как мы проходим мимо собственного успеха. Какие состояния мы выбираем и как они определяют нашу жизнь — например, изобилие или дефицит.</p></article>
     </div>
   </div>
 </section>
 
 <!-- 07 · Как это происходит -->
-<section class="sec sec--lime" id="how" data-theme="light">
+<section class="sec sec--lime sec--round" id="how" data-theme="light">
   <div class="wrap grid">
     <div class="col-left">
       <p class="chapter reveal"><i></i>Как это происходит</p>
-      <h2 class="h2 reveal">Вам не обязательно выходить с личным запросом</h2>
+      <h2 class="h2 split">Вам не обязательно выходить с личным запросом</h2>
     </div>
     <div class="col-right copy reveal">
       <p class="lead">Иногда на сцену выходит совершенно незнакомый человек. У него другая история. Другая семья. Другие обстоятельства.</p>
       <p>А потом он произносит одну фразу — и вы понимаете:</p>
-      <p class="line-serif">«У меня то же самое».</p>
-      <p>Поэтому работа происходит не только с тем, кто непосредственно разговаривает с Леонидом Тальписом.</p>
     </div>
   </div>
+  <figure class="bleed bleed--tall reveal" data-cursor="смотреть">
+    <img src="assets/img/audience.webp" srcset="assets/img/audience-640.webp 640w, assets/img/audience.webp 1400w" sizes="100vw" width="1400" height="933" alt="Участники семинара в зале смеются и слушают" loading="lazy" decoding="async">
+    <div class="bleed__veil"></div>
+    <p class="bleed__line split">«У меня то же самое».</p>
+  </figure>
   <div class="wrap grid">
-    <figure class="media media--land col-left reveal">
-      <img src="assets/img/audience.webp" srcset="assets/img/audience-640.webp 640w, assets/img/audience.webp 1400w" sizes="(max-width: 899px) 100vw, 50vw" width="1400" height="933" alt="Участники семинара в зале смеются и слушают" loading="lazy" decoding="async">
-    </figure>
-    <div class="col-right copy">
+    <div class="col-left copy reveal">
+      <p class="lead">Поэтому работа происходит не только с тем, кто непосредственно разговаривает с Леонидом Тальписом.</p>
+      <p class="mark split" style="margin-top:40px">Иногда чужая история позволяет увидеть о себе то, чего мы годами не замечали в собственной.</p>
+    </div>
+    <div class="col-right">
       <ol class="steps reveal" aria-label="Что происходит с залом">
         <i class="steps__fill" aria-hidden="true"></i>
         <li><span class="steps__n">01</span><span class="steps__t">Весь зал наблюдает.</span></li>
@@ -269,7 +312,6 @@
         <li><span class="steps__n">04</span><span class="steps__t">Сопоставляет со своей жизнью.</span></li>
         <li><span class="steps__n">05</span><span class="steps__t">И находится в общем поле происходящего.</span></li>
       </ol>
-      <p class="mark reveal" style="margin-top:40px">Иногда чужая история позволяет увидеть о себе то, чего мы годами не замечали в собственной.</p>
     </div>
   </div>
 </section>
@@ -278,12 +320,12 @@
 <section class="sec" id="program" data-theme="light">
   <div class="wrap">
     <p class="chapter reveal"><i></i>Программа двух дней</p>
-    <h2 class="h2 h2--xl reveal">Возможно, вам не нужно становиться другим человеком</h2>
+    <h2 class="h2 h2--xl split">Возможно, вам не нужно становиться другим человеком</h2>
   </div>
   <div class="wrap grid">
     <div class="col-left copy reveal">
       <p class="lead">Возможно, достаточно увидеть то, чего вы раньше не замечали.</p>
-      <p class="line-serif">Одно убеждение. Один повторяющийся сценарий. Одну внутреннюю договорённость с собой.</p>
+      <p class="line-serif split">Одно убеждение. Один повторяющийся сценарий. Одну внутреннюю договорённость с собой.</p>
       <p>И понять: почему ваша жизнь стала именно такой — и что теперь с этим делать.</p>
     </div>
     <div class="col-right card program__card reveal">
@@ -295,9 +337,9 @@
       </ul>
       <p>Лёгкий, живой и глубокий разговор о том, из чего складывается наша жизнь.</p>
       <p class="when"><span>26–27 сентября 2026</span><span>Алматы + онлайн</span></p>
-      <a class="btn btn--primary" href="#buy">Принять участие</a>
+      <a class="btn btn--primary" href="#buy" data-magnet>Принять участие</a>
     </div>
-    <figure class="media media--land col-12 program__photo reveal">
+    <figure class="media media--land col-12 program__photo reveal" data-cursor="смотреть">
       <img src="assets/img/leonid-chair.webp" srcset="assets/img/leonid-chair-640.webp 640w, assets/img/leonid-chair.webp 1600w" sizes="(max-width: 899px) 100vw, 56vw" width="1600" height="1200" alt="Леонид Тальпис сидит в кресле у светлой стены с картинами" loading="lazy" decoding="async">
       <figcaption>Леонид Тальпис</figcaption>
     </figure>
@@ -305,14 +347,14 @@
 </section>
 
 <!-- 09 · Автор и ведущий -->
-<section class="sec sec--lime" id="leonid" data-theme="light">
+<section class="sec sec--lime sec--round" id="leonid" data-theme="light">
   <div class="wrap grid">
-    <figure class="media media--portrait col-left reveal">
+    <figure class="media media--portrait col-left reveal" data-cursor="смотреть">
       <img src="assets/img/leonid-portrait.webp" srcset="assets/img/leonid-portrait-640.webp 640w, assets/img/leonid-portrait.webp 1000w" sizes="(max-width: 899px) 100vw, 50vw" width="1000" height="1334" alt="Портрет Леонида Тальписа" loading="lazy" decoding="async">
     </figure>
     <div class="col-right copy">
       <p class="chapter reveal"><i></i>Автор и ведущий мировоззренческого семинара</p>
-      <h2 class="h2 reveal">Леонид Тальпис</h2>
+      <h2 class="h2 split">Леонид Тальпис</h2>
       <div class="copy reveal">
         <p>Врач в шестом поколении и психолог. 28 лет практики, больше 20 тысяч учеников. 18 лет развивает собственную мировоззренческую систему, которую сегодня преподают психологам в России, Казахстане, ОАЭ и Европе. Автор книги «Да пребудет с вами ВсеЛенская терапия» (АСТ, 2024). Работает не с симптомом, а с тем, как человек вообще думает о жизни — поэтому на МВС меняется не список дел, а взгляд.</p>
         <dl class="facts">
@@ -330,10 +372,10 @@
   </div>
   <div class="wrap grid">
     <blockquote class="quote col-wide reveal">
-      <p>«Мы живём ровно так, как мы о жизни думаем. Давайте посмотрим, как о ней можно думать ещё».</p>
+      <p class="split">«Мы живём ровно так, как мы о жизни думаем. Давайте посмотрим, как о ней можно думать ещё».</p>
       <footer>Леонид Тальпис, открытие прошлого МВС</footer>
     </blockquote>
-    <p class="mark col-narrow reveal">Через чужую историю свой механизм видно точнее, чем через свою: там нет твоих объяснений.</p>
+    <p class="mark col-narrow split">Через чужую историю свой механизм видно точнее, чем через свою: там нет твоих объяснений.</p>
   </div>
 </section>
 
@@ -341,10 +383,10 @@
 <section class="sec" id="buy" data-theme="light">
   <div class="wrap">
     <p class="chapter reveal"><i></i>Форматы участия</p>
-    <h2 class="h2 reveal">Выбирайте формат, как провести эти два дня</h2>
+    <h2 class="h2 split">Выбирайте формат, как провести эти два дня</h2>
     <p class="lead reveal" style="margin-top:22px">Содержание одно. Разница — насколько близко ты к живой работе.</p>
 
-    <figure class="media media--wide formats__banner reveal">
+    <figure class="media media--wide formats__banner reveal" data-cursor="смотреть">
       <img src="assets/img/hall.webp" srcset="assets/img/hall-640.webp 640w, assets/img/hall.webp 1600w" sizes="100vw" width="1600" height="1067" alt="Зал прошлого семинара: участники перед сценой с экранами" loading="lazy" decoding="async">
       <figcaption>Прошлый МВС</figcaption>
     </figure>
@@ -361,7 +403,7 @@
         </ul>
         <p class="small plan__price">Стоимость и условия — ответим в течение часа</p>
         <div class="plan__actions">
-          <button class="btn btn--primary" type="button" data-form="online">Оплата картой РФ</button>
+          <button class="btn btn--primary" type="button" data-form="online" data-magnet>Оплата картой РФ</button>
           <button class="btn btn--ghost" type="button" data-form="online-norf">Оплата зарубежной картой</button>
         </div>
       </article>
@@ -377,7 +419,7 @@
         </ul>
         <p class="small plan__price">Стоимость и условия — ответим в течение часа</p>
         <div class="plan__actions">
-          <button class="btn btn--primary" type="button" data-form="offline">Оплата картой РФ</button>
+          <button class="btn btn--primary" type="button" data-form="offline" data-magnet>Оплата картой РФ</button>
           <button class="btn btn--ghost" type="button" data-form="offline-norf">Оплата зарубежной картой</button>
         </div>
       </article>
@@ -395,7 +437,7 @@
     </div>
 
     <div class="grid fit">
-      <h3 class="h3 col-left reveal">Кому подойдёт</h3>
+      <h3 class="h3 col-left split">Кому подойдёт</h3>
       <ul class="fit__list col-right reveal">
         <li>Тем, кто узнаёт у себя повторяющиеся сценарии — в деньгах, отношениях, работе — и устал ходить по кругу.</li>
         <li>Тем, кому надоели «правильные советы» и кто хочет увидеть механизм.</li>
@@ -407,12 +449,12 @@
 </section>
 
 <!-- 11 · Вопросы -->
-<section class="sec sec--lime" id="faq" data-theme="light">
+<section class="sec sec--lime sec--round" id="faq" data-theme="light">
   <div class="wrap grid">
     <div class="col-left sticky">
       <p class="chapter reveal"><i></i>Вопросы</p>
-      <h2 class="h2 reveal">Что спрашивают перед семинаром</h2>
-      <figure class="media media--land reveal hang faq__photo">
+      <h2 class="h2 split">Что спрашивают перед семинаром</h2>
+      <figure class="media media--land reveal hang faq__photo" data-cursor="смотреть">
         <img src="assets/img/stage-smile.webp" srcset="assets/img/stage-smile-640.webp 640w, assets/img/stage-smile.webp 1400w" sizes="(max-width: 899px) 100vw, 40vw" width="1400" height="933" alt="Леонид Тальпис улыбается на сцене, рядом обнимаются участники" loading="lazy" decoding="async">
       </figure>
     </div>
@@ -454,17 +496,17 @@
 </section>
 
 <!-- 12 · Выбор: единственная тёмная сцена -->
-<section class="final" id="choice" data-theme="dark">
+<section class="final sec--round" id="choice" data-theme="dark">
   <div class="final__media" aria-hidden="true">
     <img src="assets/img/doorway.webp" srcset="assets/img/doorway-640.webp 640w, assets/img/doorway.webp 1400w" sizes="100vw" width="1400" height="792" alt="" loading="lazy" decoding="async">
     <div class="final__veil"></div>
   </div>
   <div class="final__content">
     <p class="lead reveal">Иногда свобода начинается с вопроса: «Это точно мой выбор?»</p>
-    <h2 class="h2 h2--final reveal">Твоя жизнь — это точно твой выбор<span class="q">?</span></h2>
+    <h2 class="h2 h2--final split">Твоя жизнь — это точно твой выбор<span class="q">?</span></h2>
     <p class="meta final__meta reveal"><span>26–27 сентября 2026</span><span>Алматы + онлайн</span><span data-countdown>через 15 дней</span></p>
     <div class="actions actions--center reveal">
-      <a class="btn btn--light" href="#buy">Выбрать формат участия</a>
+      <a class="btn btn--light" href="#buy" data-magnet>Выбрать формат участия</a>
       <a class="btn btn--ghost-light" href="#program">Программа двух дней</a>
     </div>
   </div>
@@ -542,6 +584,7 @@
 
 <script src="vendor/gsap.min.js" defer></script>
 <script src="vendor/ScrollTrigger.min.js" defer></script>
+<script src="vendor/SplitText.min.js" defer></script>
 <script src="vendor/lenis.min.js" defer></script>
 <script src="js/main.js" defer></script>
 </body>

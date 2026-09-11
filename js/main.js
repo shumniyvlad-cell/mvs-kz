@@ -1,5 +1,5 @@
 /* МВС Казахстан — интерактив: медленно, мягко, один раз.
-   Зависимости: GSAP 3.13 + ScrollTrigger, Lenis — локально в /vendor. */
+   Зависимости: GSAP 3.13 + ScrollTrigger + SplitText, Lenis — локально в /vendor. */
 
 (() => {
   'use strict';
@@ -33,11 +33,13 @@
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  const hasGsap = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
-  const motion  = hasGsap && html.classList.contains('motion');
+  const hasGsap  = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
+  const hasSplit = hasGsap && typeof SplitText !== 'undefined';
+  const motion   = hasGsap && html.classList.contains('motion');
   if (!motion) { html.classList.remove('motion'); html.classList.add('reduced'); }
   if (hasGsap) {
     gsap.registerPlugin(ScrollTrigger);
+    if (hasSplit) gsap.registerPlugin(SplitText);
     gsap.registerEase('soft', gsap.parseEase('cubic-bezier(.32,.72,0,1)'));
     gsap.registerEase('softOut', gsap.parseEase('cubic-bezier(.22,1,.36,1)'));
   }
@@ -45,6 +47,7 @@
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const isDesktop = () => matchMedia('(min-width: 900px)').matches;
   const navH = () => ($('#nav') ? $('#nav').offsetHeight : 76);
+  const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
   /* ---------- Плавный скролл ---------- */
   let lenis = null;
@@ -114,6 +117,43 @@
 
   /* ---------- Тема шапки и рейла ---------- */
   const setDark = (on) => body.classList.toggle('on-dark', !!on);
+
+  /* ---------- Слова-маска героя: раскладка текста в SVG (нужна и без анимаций) ---------- */
+  const mask = $('.mask');
+  const maskLines = $$('.mask__t');
+  const maskQ = $('.mask__q');
+  const maskG = $('.mask__g');
+  const maskOpen = $('.mask__open');
+  const maskImg = $('.mask__img');
+  const maskShade = $('.mask__shade');
+  const maskQG = $('.mask__qg');
+  let maskCenter = { x: 0, y: 0 }, maskSize = { w: 0, h: 0 };
+
+  const layoutMask = () => {
+    if (!mask) return;
+    const W = mask.clientWidth || window.innerWidth, H = mask.clientHeight || window.innerHeight;
+    maskSize = { w: W, h: H };
+    const wrap = $('.hero__content');
+    const x = wrap ? wrap.getBoundingClientRect().left + parseFloat(getComputedStyle(wrap).paddingLeft) : 64;
+    const bottomH = ($('.hero__bottom') ? $('.hero__bottom').offsetHeight : 160) + 64;
+    const top = navH() + H * 0.04 + 46;
+    const avail = H - top - bottomH;
+    const fs = Math.max(72, Math.min(W * 0.108, avail / 3.06));
+    maskLines.forEach((t, i) => {
+      t.textContent = t.dataset.line;
+      t.setAttribute('x', x);
+      t.setAttribute('y', top + fs * 0.94 + i * fs * 1.02);
+      t.setAttribute('font-size', fs);
+    });
+    const measure = (t) => { let l = 0; try { l = t.getComputedTextLength(); } catch (e) {} return l || fs * 0.5 * t.dataset.line.length; };
+    const l3 = maskLines[2];
+    maskQ.setAttribute('font-size', fs);
+    maskQ.setAttribute('x', x + measure(l3) + fs * 0.06);
+    maskQ.setAttribute('y', l3.getAttribute('y'));
+    const maxLen = Math.max(...maskLines.map(measure));
+    maskCenter = { x: x + maxLen * 0.42, y: top + fs * 1.55 };
+  };
+  layoutMask();
 
   /* ---------- Модальное окно и форма ---------- */
   const modal = $('#modal');
@@ -229,6 +269,8 @@
   /* ---------- Служебные триггеры (работают и при reduce-motion) ---------- */
   const nav = $('#nav');
   ScrollTrigger.create({ start: 'top -30', end: 99999, toggleClass: { targets: nav, className: 'is-scrolled' } });
+  // Шапка прячется при скролле вниз и возвращается при скролле вверх
+  ScrollTrigger.create({ start: 240, end: 'max', onUpdate: (s) => nav.classList.toggle('is-hidden', s.direction === 1), onLeaveBack: () => nav.classList.remove('is-hidden') });
 
   const rail = $('.rail'), railFill = $('.rail__fill'), railPin = $('.rail__pin');
   if (rail) {
@@ -243,65 +285,153 @@
     });
   });
 
+  window.addEventListener('resize', debounce(() => { layoutMask(); ScrollTrigger.refresh(); }, 200));
+
   if (!motion) return;
 
-  /* ---------- Дверь-кадр: clip-path от волосяной щели до приоткрытой двери (интро) и до полного экрана (скролл) ---------- */
-  const CLIP = {
-    hair: () => (isDesktop() ? 'inset(24vh 26vw 24vh 73.9vw round 24px)' : 'inset(20vh 49.8vw 66vh 49.8vw round 20px)'),
-    door: () => (isDesktop() ? 'inset(10vh 6vw 10vh 52vw round 24px)' : 'inset(8vh 5vw 58vh 5vw round 20px)'),
-    open: () => (isDesktop() ? 'inset(0vh 0vw 0vh 0vw round 0px)' : 'inset(0vh 0vw 0vh 0vw round 0px)')
-  };
+  /* ---------- Курсор с подписями (мышь) ---------- */
+  if (finePointer) {
+    const cur = $('.cursor'), lab = $('.cursor__label');
+    if (cur) {
+      html.classList.add('cursor-on');
+      const qx = gsap.quickTo(cur, 'x', { duration: 0.3, ease: 'softOut' });
+      const qy = gsap.quickTo(cur, 'y', { duration: 0.3, ease: 'softOut' });
+      window.addEventListener('mousemove', (e) => { qx(e.clientX); qy(e.clientY); cur.classList.add('is-on'); }, { passive: true });
+      document.addEventListener('mouseleave', () => cur.classList.remove('is-on'));
+      document.addEventListener('mouseover', (e) => {
+        const labelled = e.target.closest('[data-cursor]');
+        if (labelled) { lab.textContent = labelled.dataset.cursor; cur.classList.add('is-label'); cur.classList.remove('is-link'); return; }
+        cur.classList.remove('is-label');
+        cur.classList.toggle('is-link', !!e.target.closest('a, button, summary, label'));
+      });
+    }
 
-  const intro = () => {
-    const scene = $('.scene'), img = $('.scene__img');
-    const chapter = $('.hero__content .chapter');
-    const lines = $$('.hero__title .line > span');
-    const rest = $$('.hero__content .lead, .hero__content .meta, .hero__content .actions');
-    gsap.set([scene, chapter, ...lines, ...rest, nav, rail].filter(Boolean), { visibility: 'visible' });
-    gsap.set(scene, { clipPath: CLIP.hair() });
-    // Кадр сдвинут так, чтобы человек в проёме стоял в центре двери; при раскрытии двери кадр возвращается на место
-    gsap.set(img, { scale: 1.08, xPercent: isDesktop() ? 23 : 0, yPercent: isDesktop() ? 0 : -18, transformOrigin: '50% 50%' });
-    gsap.set(lines, { yPercent: 112 });
-    gsap.set([chapter, ...rest], { autoAlpha: 0, y: 22 });
-    gsap.set([nav, rail].filter(Boolean), { autoAlpha: 0 });
-
-    const tl = gsap.timeline({ defaults: { ease: 'soft' }, delay: 0.15 });
-    tl.to(scene, { clipPath: CLIP.door(), duration: 1.6 })
-      .to(img, { scale: 1, duration: 2.6, ease: 'softOut' }, 0)
-      .to(chapter, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.5)
-      .to(lines, { yPercent: 0, duration: 1.25, ease: 'softOut', stagger: 0.14 }, 0.6)
-      .to(rest, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.14 }, 1.1)
-      .to([nav, rail].filter(Boolean), { autoAlpha: 1, duration: 0.8 }, 1.2);
-    return tl;
-  };
-
-  // Переход через порог: дверь раскрывается на весь экран, вуаль укладывает кадр в страницу
-  const crossing = () => {
-    const hero = $('.hero'), scene = $('.scene'), img = $('.scene__img'), veil = $('.scene__veil'), content = $('.hero__content'), tag = $('.scene__tag');
-    const tl = gsap.timeline({
-      scrollTrigger: { trigger: hero, start: 'top top', end: '+=110%', pin: true, scrub: 0.6, anticipatePin: 1, invalidateOnRefresh: true }
+    // Магнитные кнопки
+    $$('[data-magnet]').forEach((b) => {
+      const qx = gsap.quickTo(b, 'x', { duration: 0.45, ease: 'soft' });
+      const qy = gsap.quickTo(b, 'y', { duration: 0.45, ease: 'soft' });
+      b.addEventListener('mousemove', (e) => {
+        const r = b.getBoundingClientRect();
+        qx((e.clientX - (r.left + r.width / 2)) * 0.18);
+        qy((e.clientY - (r.top + r.height / 2)) * 0.3);
+      });
+      b.addEventListener('mouseleave', () => { qx(0); qy(0); });
     });
-    tl.to([content, tag], { autoAlpha: 0, y: -16, ease: 'none', duration: 0.45 }, 0)
-      .fromTo(scene, { clipPath: () => CLIP.door() }, { clipPath: () => CLIP.open(), ease: 'soft', duration: 1, immediateRender: false }, 0)
-      .to(img, { scale: 1.05, xPercent: 0, yPercent: 0, ease: 'soft', duration: 1 }, 0)
-      .to(veil, { opacity: 1, ease: 'none', duration: 0.5 }, 0.5);
+  }
+
+  /* ---------- Герой ---------- */
+  // Мобильная дверь-кадр: clip-path от волосяной щели до приоткрытой двери (интро) и до полного экрана (скролл)
+  const CLIP = {
+    hair: 'inset(24vh 49.8vw 66vh 49.8vw round 20px)',
+    door: 'inset(13vh 5vw 58vh 5vw round 20px)',
+    open: 'inset(0vh 0vw 0vh 0vw round 0px)'
   };
 
+  const introDesktop = () => {
+    const kicker = $('.hero__kicker'), tag = $('.hero__tag');
+    const rest = $$('.hero__text > *, .hero__content .actions');
+    gsap.set([mask, kicker, tag, ...rest, nav, rail].filter(Boolean), { visibility: 'visible' });
+    gsap.set(maskLines, { y: 90, opacity: 0 });
+    gsap.set(maskQ, { opacity: 0, scale: 0.6, transformOrigin: '50% 50%' });
+    gsap.set(maskImg, { scale: 1.1, svgOrigin: `${maskSize.w / 2} ${maskSize.h / 2}` });
+    gsap.set([kicker, ...rest], { autoAlpha: 0, y: 22 });
+    gsap.set([nav, rail, tag].filter(Boolean), { autoAlpha: 0 });
+    const tl = gsap.timeline({ defaults: { ease: 'soft' }, delay: 0.15 });
+    tl.to(maskLines, { y: 0, opacity: 1, duration: 1.3, stagger: 0.14, ease: 'softOut' }, 0.1)
+      .to(maskImg, { scale: 1, duration: 2.8, ease: 'softOut' }, 0)
+      .to(maskQ, { opacity: 1, scale: 1, duration: 0.8, ease: 'back.out(1.6)' }, 0.95)
+      .to(kicker, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.5)
+      .to(rest, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.12 }, 1.0)
+      .to([nav, rail, tag].filter(Boolean), { autoAlpha: 1, duration: 0.8 }, 1.2);
+  };
+
+  const introMobile = () => {
+    const scene = $('.scene'), img = $('.scene__img'), kicker = $('.hero__kicker');
+    const lines = $$('.hero__title .line > span');
+    const rest = $$('.hero__text > *, .hero__content .actions');
+    gsap.set([scene, kicker, ...lines, ...rest, nav].filter(Boolean), { visibility: 'visible' });
+    gsap.set(scene, { clipPath: CLIP.hair });
+    gsap.set(img, { scale: 1.08, yPercent: -18, transformOrigin: '50% 50%' });
+    gsap.set(lines, { yPercent: 112 });
+    gsap.set([kicker, ...rest], { autoAlpha: 0, y: 22 });
+    gsap.set(nav, { autoAlpha: 0 });
+    const tl = gsap.timeline({ defaults: { ease: 'soft' }, delay: 0.15 });
+    tl.to(scene, { clipPath: CLIP.door, duration: 1.6 })
+      .to(img, { scale: 1, duration: 2.6, ease: 'softOut' }, 0)
+      .to(kicker, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.5)
+      .to(lines, { yPercent: 0, duration: 1.25, ease: 'softOut', stagger: 0.14 }, 0.6)
+      .to(rest, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.12 }, 1.1)
+      .to(nav, { autoAlpha: 1, duration: 0.8 }, 1.2);
+  };
+
+  // Переход через порог. Десктоп: буквы растут, мы уходим сквозь них в кадр. Мобильный: дверь раскрывается на весь экран.
+  let crossTL = null;
+  const crossing = () => {
+    if (crossTL) { crossTL.scrollTrigger && crossTL.scrollTrigger.kill(); crossTL.kill(); crossTL = null; }
+    const hero = $('.hero'), content = $('.hero__content'), top = $('.hero__top');
+    if (isDesktop()) {
+      const veil = $('.hero__veil');
+      gsap.set(maskG, { svgOrigin: `${maskCenter.x} ${maskCenter.y}` });
+      crossTL = gsap.timeline({
+        scrollTrigger: { trigger: hero, start: 'top top', end: '+=200%', pin: true, scrub: 0.6, anticipatePin: 1, invalidateOnRefresh: true }
+      });
+      crossTL.to([content, top], { autoAlpha: 0, y: -16, ease: 'none', duration: 0.35 }, 0)
+        .to(maskQG, { autoAlpha: 0, ease: 'none', duration: 0.2 }, 0)
+        .to(maskG, { scale: 9, ease: 'power2.in', duration: 0.75 }, 0)
+        .to(maskShade, { opacity: 0, ease: 'none', duration: 0.45 }, 0.15)
+        .to(maskOpen, { opacity: 1, ease: 'none', duration: 0.35 }, 0.4)
+        .to(maskImg, { scale: 1.06, ease: 'none', duration: 1 }, 0)
+        .to(veil, { opacity: 1, ease: 'none', duration: 0.3 }, 0.7);
+    } else {
+      const scene = $('.scene'), img = $('.scene__img'), veil = $('.scene__veil'), tag = $('.scene__tag');
+      crossTL = gsap.timeline({
+        scrollTrigger: { trigger: hero, start: 'top top', end: '+=110%', pin: true, scrub: 0.6, anticipatePin: 1, invalidateOnRefresh: true }
+      });
+      crossTL.to([content, top, tag], { autoAlpha: 0, y: -16, ease: 'none', duration: 0.45 }, 0)
+        .fromTo(scene, { clipPath: CLIP.door }, { clipPath: CLIP.open, ease: 'soft', duration: 1, immediateRender: false }, 0)
+        .to(img, { scale: 1.05, yPercent: 0, ease: 'soft', duration: 1 }, 0)
+        .to(veil, { opacity: 1, ease: 'none', duration: 0.5 }, 0.5);
+    }
+  };
+
+  /* ---------- Поле невидимых причин ---------- */
+  const field = () => {
+    const words = $$('.field__words span');
+    if (!words.length) return;
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 900px)', () => {
+      const pin = $('.field__pin');
+      gsap.set(words, { y: (i) => (i % 2 ? 46 : -46) });
+      const tl = gsap.timeline({ scrollTrigger: { trigger: pin, start: 'top top', end: '+=150%', pin: true, scrub: 0.5, anticipatePin: 1, invalidateOnRefresh: true } });
+      tl.to(words, { filter: 'blur(0px)', opacity: 1, y: 0, duration: 1, ease: 'none', stagger: { each: 0.1, from: 'random' } }, 0.1);
+      return () => gsap.set(words, { clearProps: 'all' });
+    });
+    mm.add('(max-width: 899px)', () => {
+      gsap.to(words, { filter: 'blur(0px)', opacity: 1, stagger: 0.1, ease: 'none', scrollTrigger: { trigger: '.field__words', start: 'top 85%', end: 'top 35%', scrub: true } });
+    });
+  };
+
+  /* ---------- Появления ---------- */
   const reveals = () => {
-    // Появление блоков: opacity 0 → 1, translateY 22px → 0, один раз
+    // Заголовки и крупные строки — масками по строкам
+    if (hasSplit) {
+      $$('.split').forEach((el) => {
+        SplitText.create(el, {
+          type: 'lines', mask: 'lines', linesClass: 'sl', autoSplit: true,
+          onSplit(self) {
+            gsap.set(el, { visibility: 'visible' });
+            return gsap.from(self.lines, { yPercent: 110, duration: 1.05, ease: 'softOut', stagger: 0.08, scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+          }
+        });
+      });
+    } else {
+      gsap.set('.split', { visibility: 'visible' });
+    }
+
+    // Остальные блоки: opacity 0 → 1, translateY 22px → 0, один раз
     $$('.reveal').forEach((el) => {
       gsap.set(el, { visibility: 'visible' });
       gsap.from(el, { autoAlpha: 0, y: 22, duration: 0.85, ease: 'soft', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
-    });
-
-    // Слова, которых мы не замечаем: из размытости в фокус по мере скролла
-    const unseen = $('.unseen');
-    if (unseen) {
-      gsap.to($$('span', unseen), { filter: 'blur(0px)', opacity: 1, stagger: 0.12, ease: 'none', scrollTrigger: { trigger: unseen, start: 'top 85%', end: 'top 30%', scrub: true } });
-    }
-
-    $$('.topics').forEach((t) => {
-      gsap.from($$('span', t), { autoAlpha: 0, y: 12, duration: 0.8, stagger: 0.1, ease: 'soft', scrollTrigger: { trigger: t, start: 'top 85%', once: true } });
     });
 
     $$('.stack').forEach((st) => {
@@ -328,11 +458,15 @@
         onUpdate: () => { dt.textContent = Math.round(o.v).toLocaleString('ru-RU') + suffix; } });
     });
 
-    // Лёгкий параллакс внутри рамок
+    // Параллакс внутри рамок и на полноэкранных фото
     $$('.media').forEach((f) => {
       const img = $('img', f);
       if (!img) return;
       gsap.fromTo(img, { yPercent: -4 }, { yPercent: 4, ease: 'none', scrollTrigger: { trigger: f, start: 'top bottom', end: 'bottom top', scrub: true } });
+    });
+    $$('.bleed').forEach((f) => {
+      const img = $('img', f);
+      gsap.fromTo(img, { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: f, start: 'top bottom', end: 'bottom top', scrub: true } });
     });
   };
 
@@ -351,14 +485,23 @@
     });
   };
 
+  let lastDesktop = isDesktop();
   const start = () => {
-    intro();
+    layoutMask();
+    if (isDesktop()) introDesktop(); else introMobile();
     crossing();
+    field();
     reveals();
     corridor();
     ScrollTrigger.refresh();
     if (location.hash && $(location.hash)) setTimeout(() => goTo(location.hash), 200);
   };
+
+  window.addEventListener('resize', debounce(() => {
+    const d = isDesktop();
+    if (d !== lastDesktop) { lastDesktop = d; location.reload(); return; }   // раскладка героя разная — проще перезагрузить
+    if (d) { layoutMask(); crossing(); ScrollTrigger.refresh(); }
+  }, 250));
 
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(start);
   window.addEventListener('load', () => ScrollTrigger.refresh());
