@@ -1,5 +1,5 @@
-/* МВС Казахстан — интерактив.
-   Зависимости: GSAP 3.13 + ScrollTrigger + SplitText, Lenis — всё локально в /vendor. */
+/* МВС Казахстан — интерактив: медленно, мягко, один раз.
+   Зависимости: GSAP 3.13 + ScrollTrigger, Lenis — локально в /vendor. */
 
 (() => {
   'use strict';
@@ -33,14 +33,18 @@
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  const hasGsap  = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
-  const hasSplit = hasGsap && typeof SplitText !== 'undefined';
-  const motion   = hasGsap && html.classList.contains('motion');
+  const hasGsap = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
+  const motion  = hasGsap && html.classList.contains('motion');
   if (!motion) { html.classList.remove('motion'); html.classList.add('reduced'); }
-  if (hasGsap) { gsap.registerPlugin(ScrollTrigger); if (hasSplit) gsap.registerPlugin(SplitText); }
+  if (hasGsap) {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerEase('soft', gsap.parseEase('cubic-bezier(.32,.72,0,1)'));
+    gsap.registerEase('softOut', gsap.parseEase('cubic-bezier(.22,1,.36,1)'));
+  }
 
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
-  const navH = () => parseFloat(getComputedStyle(html).getPropertyValue('--nav-h')) || 76;
+  const isDesktop = () => matchMedia('(min-width: 900px)').matches;
+  const navH = () => ($('#nav') ? $('#nav').offsetHeight : 76);
 
   /* ---------- Плавный скролл ---------- */
   let lenis = null;
@@ -93,7 +97,7 @@
     });
   });
 
-  /* ---------- Обратный отсчёт ---------- */
+  /* ---------- «Через N дней» ---------- */
   const plural = (n, one, few, many) => {
     const m10 = n % 10, m100 = n % 100;
     if (m10 === 1 && m100 !== 11) return one;
@@ -108,8 +112,8 @@
       : 'семинар прошёл';
   });
 
-  /* ---------- Тема шапки и рейки ---------- */
-  const setTheme = (t) => body.classList.toggle('on-stone', t === 'stone');
+  /* ---------- Тема шапки и рейла ---------- */
+  const setDark = (on) => body.classList.toggle('on-dark', !!on);
 
   /* ---------- Модальное окно и форма ---------- */
   const modal = $('#modal');
@@ -142,7 +146,7 @@
     body.classList.add('modal-open');
     lenis && lenis.stop();
     lastFocus = btn;
-    if (motion) gsap.fromTo(panel, { y: 28, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.55, ease: 'power3.out' });
+    if (motion) gsap.fromTo(panel, { y: 22, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.7, ease: 'soft' });
     setTimeout(() => form.name.focus(), 60);
   };
   const closeModal = () => {
@@ -153,7 +157,7 @@
       lenis && lenis.start();
       lastFocus && lastFocus.focus();
     };
-    if (motion) gsap.to(panel, { y: 16, autoAlpha: 0, duration: 0.3, ease: 'power2.in', onComplete: finish });
+    if (motion) gsap.to(panel, { y: 12, autoAlpha: 0, duration: 0.35, ease: 'soft', onComplete: finish });
     else finish();
   };
   $$('[data-form]').forEach((b) => b.addEventListener('click', () => openModal(b)));
@@ -173,7 +177,7 @@
     e.preventDefault();
     form.classList.add('is-invalid');
     if (!form.checkValidity()) {
-      errEl.textContent = 'Заполните имя, email и телефон и отметьте все согласия.';
+      errEl.textContent = 'Проверьте имя, email и телефон и отметьте все согласия.';
       const first = form.querySelector(':invalid');
       first && first.focus();
       return;
@@ -211,10 +215,10 @@
       if (!motion) return;                        // без анимаций работает нативный <details>
       e.preventDefault();
       if (d.open) {
-        gsap.to(content, { height: 0, duration: 0.4, ease: 'power3.inOut', onComplete: () => { d.open = false; gsap.set(content, { clearProps: 'height' }); ScrollTrigger.refresh(); } });
+        gsap.to(content, { height: 0, duration: 0.5, ease: 'soft', onComplete: () => { d.open = false; gsap.set(content, { clearProps: 'height' }); ScrollTrigger.refresh(); } });
       } else {
         d.open = true;
-        gsap.fromTo(content, { height: 0 }, { height: 'auto', duration: 0.55, ease: 'power3.out', onComplete: () => { gsap.set(content, { clearProps: 'height' }); ScrollTrigger.refresh(); } });
+        gsap.fromTo(content, { height: 0 }, { height: 'auto', duration: 0.6, ease: 'soft', onComplete: () => { gsap.set(content, { clearProps: 'height' }); ScrollTrigger.refresh(); } });
       }
     });
   });
@@ -226,91 +230,68 @@
   const nav = $('#nav');
   ScrollTrigger.create({ start: 'top -30', end: 99999, toggleClass: { targets: nav, className: 'is-scrolled' } });
 
-  const railLight = $('.rail__light');
-  if (railLight) ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (s) => gsap.set(railLight, { scaleY: s.progress }) });
+  const rail = $('.rail'), railFill = $('.rail__fill'), railPin = $('.rail__pin');
+  if (rail) {
+    ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (s) => { gsap.set(railFill, { scaleY: s.progress }); railPin.style.top = (s.progress * 100) + '%'; } });
+  }
 
-  // Тема шапки: какая секция сейчас под навигацией. Hero под анимацией перехода управляется отдельно.
+  // Тёмный финал: шапка и рейл перекрашиваются в светлый
   $$('[data-theme]').forEach((sec) => {
-    if (motion && sec.classList.contains('hero')) return;
     ScrollTrigger.create({
       trigger: sec, start: () => `top ${navH() * 0.6}px`, end: () => `bottom ${navH() * 0.6}px`,
-      onToggle: (s) => { if (s.isActive) setTheme(sec.dataset.theme); }
+      onToggle: (s) => { if (s.isActive) setDark(sec.dataset.theme === 'dark'); }
     });
   });
 
-  if (!motion) {
-    // Статичный режим: щели стоят открытыми, всё видно
-    return;
-  }
+  if (!motion) return;
 
-  /* ---------- Анимации ---------- */
-  gsap.set('.slit', { xPercent: -50, yPercent: -50 });
+  /* ---------- Дверь-кадр: clip-path от волосяной щели до приоткрытой двери (интро) и до полного экрана (скролл) ---------- */
+  const CLIP = {
+    hair: () => (isDesktop() ? 'inset(24vh 26vw 24vh 73.9vw round 24px)' : 'inset(20vh 49.8vw 66vh 49.8vw round 20px)'),
+    door: () => (isDesktop() ? 'inset(10vh 6vw 10vh 52vw round 24px)' : 'inset(8vh 5vw 58vh 5vw round 20px)'),
+    open: () => (isDesktop() ? 'inset(0vh 0vw 0vh 0vw round 0px)' : 'inset(0vh 0vw 0vh 0vw round 0px)')
+  };
 
   const intro = () => {
-    const core = $('.hero .slit__core'), glow = $('.hero .slit__glow');
-    const kicker = $('.hero__kicker');
+    const scene = $('.scene'), img = $('.scene__img');
+    const chapter = $('.hero__content .chapter');
     const lines = $$('.hero__title .line > span');
-    const aside = $$('.hero__aside > *');
-    const rail = $('.rail');
-    gsap.set([core, glow, kicker, ...lines, ...aside, nav, rail], { visibility: 'visible' });
-    gsap.set(core, { scaleY: 0, transformOrigin: '50% 50%' });
-    gsap.set(glow, { autoAlpha: 0 });
+    const rest = $$('.hero__content .lead, .hero__content .meta, .hero__content .actions');
+    gsap.set([scene, chapter, ...lines, ...rest, nav, rail].filter(Boolean), { visibility: 'visible' });
+    gsap.set(scene, { clipPath: CLIP.hair() });
+    // Кадр сдвинут так, чтобы человек в проёме стоял в центре двери; при раскрытии двери кадр возвращается на место
+    gsap.set(img, { scale: 1.08, xPercent: isDesktop() ? 23 : 0, yPercent: isDesktop() ? 0 : -18, transformOrigin: '50% 50%' });
     gsap.set(lines, { yPercent: 112 });
-    gsap.set([kicker, ...aside], { autoAlpha: 0, y: 18 });
-    gsap.set([nav, rail], { autoAlpha: 0 });
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' }, delay: 0.2 });
-    tl.to(core, { scaleY: 1, duration: 1.4, ease: 'expo.inOut' })
-      .to(glow, { autoAlpha: 1, duration: 1.3, ease: 'sine.out' }, '-=0.7')
-      .to(kicker, { autoAlpha: 1, y: 0, duration: 0.8 }, '-=1.0')
-      .to(lines, { yPercent: 0, duration: 1.25, ease: 'power4.out', stagger: 0.11 }, '-=0.75')
-      .to(aside, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08 }, '-=0.85')
-      .to([nav, rail], { autoAlpha: 1, duration: 0.8 }, '-=0.7');
+    gsap.set([chapter, ...rest], { autoAlpha: 0, y: 22 });
+    gsap.set([nav, rail].filter(Boolean), { autoAlpha: 0 });
+
+    const tl = gsap.timeline({ defaults: { ease: 'soft' }, delay: 0.15 });
+    tl.to(scene, { clipPath: CLIP.door(), duration: 1.6 })
+      .to(img, { scale: 1, duration: 2.6, ease: 'softOut' }, 0)
+      .to(chapter, { autoAlpha: 1, y: 0, duration: 0.8 }, 0.5)
+      .to(lines, { yPercent: 0, duration: 1.25, ease: 'softOut', stagger: 0.14 }, 0.6)
+      .to(rest, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.14 }, 1.1)
+      .to([nav, rail].filter(Boolean), { autoAlpha: 1, duration: 0.8 }, 1.2);
     return tl;
   };
 
-  // Переход через порог: щель раскрывается на весь экран и становится фоном следующей секции
+  // Переход через порог: дверь раскрывается на весь экран, вуаль укладывает кадр в страницу
   const crossing = () => {
-    const hero = $('.hero'), slit = $('.hero .slit'), glow = $('.hero .slit__glow'), content = $('.hero__content');
-    // Щель стоит не по центру: масштаб считаем от дальнего края экрана, чтобы камень докрыл всё
-    const need = (size, center, total) => Math.ceil((2 * Math.max(center, total - center) * 1.3) / size);
+    const hero = $('.hero'), scene = $('.scene'), img = $('.scene__img'), veil = $('.scene__veil'), content = $('.hero__content'), tag = $('.scene__tag');
     const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: hero, start: 'top top', end: '+=115%', pin: true, scrub: 0.6, anticipatePin: 1, invalidateOnRefresh: true,
-        onUpdate: (s) => setTheme(s.progress > 0.86 ? 'stone' : 'night'),
-        onLeaveBack: () => setTheme('night')
-      }
+      scrollTrigger: { trigger: hero, start: 'top top', end: '+=110%', pin: true, scrub: 0.6, anticipatePin: 1, invalidateOnRefresh: true }
     });
-    tl.to(content, { yPercent: -10, autoAlpha: 0, ease: 'none', duration: 0.55 }, 0)
-      .to(glow, { autoAlpha: 0, ease: 'none', duration: 0.5 }, 0.25)
-      .to(slit, {
-        scaleX: () => need(slit.offsetWidth, slit.offsetLeft, hero.offsetWidth),
-        scaleY: () => need(slit.offsetHeight, slit.offsetTop, hero.offsetHeight),
-        ease: 'power2.in', duration: 1
-      }, 0);
+    tl.to([content, tag], { autoAlpha: 0, y: -16, ease: 'none', duration: 0.45 }, 0)
+      .fromTo(scene, { clipPath: () => CLIP.door() }, { clipPath: () => CLIP.open(), ease: 'soft', duration: 1, immediateRender: false }, 0)
+      .to(img, { scale: 1.05, xPercent: 0, yPercent: 0, ease: 'soft', duration: 1 }, 0)
+      .to(veil, { opacity: 1, ease: 'none', duration: 0.5 }, 0.5);
   };
 
   const reveals = () => {
+    // Появление блоков: opacity 0 → 1, translateY 22px → 0, один раз
     $$('.reveal').forEach((el) => {
       gsap.set(el, { visibility: 'visible' });
-      gsap.from(el, { autoAlpha: 0, y: 26, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
-    });
-
-    if (hasSplit) {
-      $$('.split').forEach((el) => {
-        SplitText.create(el, {
-          type: 'lines', mask: 'lines', linesClass: 'sl', autoSplit: true,
-          onSplit(self) {
-            gsap.set(el, { visibility: 'visible' });
-            return gsap.from(self.lines, { yPercent: 110, duration: 1.2, ease: 'power4.out', stagger: 0.09, scrollTrigger: { trigger: el, start: 'top 86%', once: true } });
-          }
-        });
-      });
-    } else {
-      gsap.set('.split', { visibility: 'visible' });
-    }
-
-    $$('.chapter').forEach((el) => {
-      gsap.fromTo(el, { '--rule-scale': 0 }, { '--rule-scale': 1, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
+      gsap.from(el, { autoAlpha: 0, y: 22, duration: 0.85, ease: 'soft', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
     });
 
     // Слова, которых мы не замечаем: из размытости в фокус по мере скролла
@@ -320,35 +301,42 @@
     }
 
     $$('.topics').forEach((t) => {
-      gsap.from($$('span', t), { autoAlpha: 0, y: 12, duration: 0.8, stagger: 0.09, ease: 'power3.out', scrollTrigger: { trigger: t, start: 'top 85%', once: true } });
+      gsap.from($$('span', t), { autoAlpha: 0, y: 12, duration: 0.8, stagger: 0.1, ease: 'soft', scrollTrigger: { trigger: t, start: 'top 85%', once: true } });
     });
 
     $$('.stack').forEach((st) => {
       const items = $$('li', st);
-      gsap.from(items, { autoAlpha: 0, y: 16, duration: 0.9, stagger: 0.09, ease: 'power3.out', scrollTrigger: { trigger: st, start: 'top 82%', once: true } });
-      gsap.to(items, { '--rs': 1, duration: 1.1, stagger: 0.09, ease: 'power3.out', scrollTrigger: { trigger: st, start: 'top 82%', once: true } });
+      gsap.from(items, { autoAlpha: 0, y: 14, duration: 0.85, stagger: 0.1, ease: 'soft', scrollTrigger: { trigger: st, start: 'top 82%', once: true } });
+      gsap.to(items, { '--rs': 1, duration: 1.1, stagger: 0.1, ease: 'soft', scrollTrigger: { trigger: st, start: 'top 82%', once: true } });
     });
 
     // Эхо: фраза повторяется — как сценарий
     $$('.echo').forEach((e) => {
-      const ghosts = $$('.echo__ghost', e);
-      gsap.from(ghosts, { y: 0, opacity: 0, duration: 1.3, ease: 'power3.out', stagger: 0.16, scrollTrigger: { trigger: e, start: 'top 80%', once: true } });
+      gsap.from($$('.echo__ghost', e), { y: 0, opacity: 0, duration: 1.3, ease: 'soft', stagger: 0.16, scrollTrigger: { trigger: e, start: 'top 80%', once: true } });
     });
 
     $$('.steps').forEach((s) => {
-      gsap.to(s, { '--ls': 1, duration: 1.5, ease: 'power2.inOut', scrollTrigger: { trigger: s, start: 'top 75%', once: true } });
-      gsap.from($$('li', s), { autoAlpha: 0, x: -12, duration: 0.8, stagger: 0.16, ease: 'power3.out', scrollTrigger: { trigger: s, start: 'top 75%', once: true } });
+      gsap.to(s, { '--ls': 1, duration: 1.5, ease: 'soft', scrollTrigger: { trigger: s, start: 'top 75%', once: true } });
+      gsap.from($$('li', s), { autoAlpha: 0, x: -10, duration: 0.8, stagger: 0.16, ease: 'soft', scrollTrigger: { trigger: s, start: 'top 75%', once: true } });
     });
 
-    // Параллакс внутри рамок
+    // Счётчики фактов набегают от нуля
+    $$('.facts dt[data-count]').forEach((dt) => {
+      const target = parseInt(dt.dataset.count, 10), suffix = dt.dataset.suffix || '';
+      const o = { v: 0 };
+      gsap.to(o, { v: target, duration: 1.2, ease: 'softOut', scrollTrigger: { trigger: dt, start: 'top 85%', once: true },
+        onUpdate: () => { dt.textContent = Math.round(o.v).toLocaleString('ru-RU') + suffix; } });
+    });
+
+    // Лёгкий параллакс внутри рамок
     $$('.media').forEach((f) => {
       const img = $('img', f);
       if (!img) return;
-      gsap.fromTo(img, { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: f, start: 'top bottom', end: 'bottom top', scrub: true } });
+      gsap.fromTo(img, { yPercent: -4 }, { yPercent: 4, ease: 'none', scrollTrigger: { trigger: f, start: 'top bottom', end: 'bottom top', scrub: true } });
     });
   };
 
-  // Коридор тем: горизонтальный проход по семи дверям (только на десктопе)
+  // Коридор тем: горизонтальный проход (только на десктопе)
   const corridor = () => {
     const mm = gsap.matchMedia();
     mm.add('(min-width: 900px)', () => {
@@ -363,27 +351,11 @@
     });
   };
 
-  // Финальный порог: щель зажигается при входе, шире — при наведении на выбор
-  const choice = () => {
-    const sec = $('.choice'), slit = $('.choice .slit'), core = $('.choice .slit__core'), glow = $('.choice .slit__glow');
-    if (!sec) return;
-    gsap.set(core, { scaleY: 0, transformOrigin: '50% 50%' });
-    gsap.set(glow, { autoAlpha: 0 });
-    gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top 60%', once: true } })
-      .to(core, { scaleY: 1, duration: 1.4, ease: 'expo.inOut' })
-      .to(glow, { autoAlpha: 1, duration: 1.2, ease: 'sine.out' }, '-=0.7');
-    $$('.choice .btn').forEach((b) => {
-      b.addEventListener('mouseenter', () => gsap.to(slit, { scaleX: 1.9, duration: 0.7, ease: 'power3.out' }));
-      b.addEventListener('mouseleave', () => gsap.to(slit, { scaleX: 1, duration: 0.9, ease: 'power3.out' }));
-    });
-  };
-
   const start = () => {
     intro();
     crossing();
     reveals();
     corridor();
-    choice();
     ScrollTrigger.refresh();
     if (location.hash && $(location.hash)) setTimeout(() => goTo(location.hash), 200);
   };
